@@ -2,8 +2,24 @@
 import requests
 import pandas as pd
 from datetime import datetime
+from google.cloud import bigquery
 import os
 from dotenv import load_dotenv
+
+# Credentials
+PROJECT_ID = os.getenv("PROJECT_ID")
+DATASET_ID = "pga_dataset"
+TABLE_ID = "raw_pga_stats"
+CSV_FILE_PATH = r'C:\Users\mrice\OneDrive\Documents\Data Science - Callum\Projects\Data Projects\pga_data_elt_pipeline\data\golf_data.csv'
+
+
+# Init big query client
+client = client = bigquery.Client.from_service_account_json(
+    r"C:\Users\mrice\OneDrive\Documents\Data Science - Callum\pga-data-pipeline-745b53073d27.json"
+)
+
+# Reference table 
+table_ref = client.dataset(DATASET_ID).table(TABLE_ID)
 
 # Define API details
 load_dotenv()
@@ -114,5 +130,19 @@ print(f'All data scraped between {start_year} and {end_year}')
 
 df = pd.DataFrame(all_stats)
 
+# Only convert player_id (or other integer columns that may have nulls)
+df['player_id'] = df['player_id'].astype('Int64')  # nullable integer
+
 # Convert to csv
 df.to_csv('data/golf_data.csv', index = False)
+
+# Configure job
+job_config = bigquery.LoadJobConfig(
+    write_disposition = bigquery.WriteDisposition.WRITE_APPEND, autodetect = True
+)
+
+# Upload to BigQuery
+job = client.load_table_from_dataframe(df, table_ref, job_config=job_config)
+job.result()
+
+print(f"Uploaded {len(df)} rows to {PROJECT_ID}.{DATASET_ID}.{TABLE_ID}")
