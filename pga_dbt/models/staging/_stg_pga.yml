@@ -1,0 +1,21 @@
+models:
+  - name: stg_pga__players
+    description: One player per row 
+    columns:
+      - name: player_id 
+        description: Primary key for this table 
+        tests:
+          - unique
+          - not_null
+  - name: stg_pga__stats
+    description: All stats in long format for players over 20 years 
+    columns: 
+      - name: player_id
+        tests:
+          - relationships:
+              to : ref('stg_pga__players')
+              field: player_id
+      - name: stat_id
+        tests:
+          - not_null
+        
