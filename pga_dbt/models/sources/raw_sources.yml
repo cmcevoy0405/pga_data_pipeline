@@ -1,0 +1,8 @@
+version: 2
+
+sources:
+  - name: pga_dataset          # a source schema/database
+    database: pga-data-pipeline   # your BigQuery project
+    schema: pga_dataset       # your dataset
+    tables:
+      - name: raw_pga_stats 

@@ -14,7 +14,7 @@ CSV_FILE_PATH = r'C:\Users\mrice\OneDrive\Documents\Data Science - Callum\Projec
 
 
 # Init big query client
-client = client = bigquery.Client.from_service_account_json(
+client = bigquery.Client.from_service_account_json(
     r"C:\Users\mrice\OneDrive\Documents\Data Science - Callum\pga-data-pipeline-745b53073d27.json"
 )
 
@@ -96,9 +96,15 @@ def fetch_player_stat(stat_id, year):
     
     player_stats = []
     for row in rows:
-        if 'playerName' in row:
-            # Keep raw values as-is
+        if 'playerName' in row and row.get('stats'):
+            stat_value = None
             for s in row['stats']:
+                if s.get('stat_id') == stat_id:
+                    stat_value = s['statValue']
+                    break
+            # Keep raw values as-is
+            if row.get('stats'):
+                stat_value = row['stats'][0]['statValue']  # take first statValue
                 player_stats.append({
                     'player_id': row['playerId'],
                     'player_name': row['playerName'],
@@ -107,7 +113,7 @@ def fetch_player_stat(stat_id, year):
                     'rank': row.get('rank'),
                     'stat_id': stat_id,
                     'stat_name': stats_to_fetch.get(stat_id, f"stat_{stat_id}"),
-                    'stat_value': s['statValue'],  # Keep raw string
+                    'stat_value': stat_value,
                     'scraped_at': datetime.now()
                 })
     
@@ -138,7 +144,7 @@ df.to_csv('data/golf_data.csv', index = False)
 
 # Configure job
 job_config = bigquery.LoadJobConfig(
-    write_disposition = bigquery.WriteDisposition.WRITE_APPEND, autodetect = True
+    write_disposition = bigquery.WriteDisposition.WRITE_TRUNCATE, autodetect = True
 )
 
 # Upload to BigQuery
