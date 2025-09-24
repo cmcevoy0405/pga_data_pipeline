@@ -1,0 +1,13 @@
+models:
+  - name: int_pga__stats
+    description: One player per row with stats in a wide format
+    columns:
+      - name: player_id 
+        description: Primary key for this table 
+  - name: dim_pga__players
+    description: one player per row, country and player id 
+    columns:
+      - name: player_id
+        description: Primary key
+
+        

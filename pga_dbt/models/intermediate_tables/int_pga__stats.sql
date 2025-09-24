@@ -6,7 +6,7 @@ select
     player_id,
     year,
     MAX(CASE WHEN stat_name = 'avg_score' then stat_value end) as avg_score,
-    MAX(CASE WHEN stat_name = 'top_10' then stat_value end) as top_10,
+    COALESCE(MAX(CASE WHEN stat_name = 'top_10' then stat_value end), 0) as top_10,
     MAX(CASE WHEN stat_name = 'drive_dist' then stat_value end) as drive_dist,
     MAX(CASE WHEN stat_name = 'drive_acc' then stat_value end) as drive_acc,
     MAX(CASE WHEN stat_name = 'putts_per_round' then stat_value end) as putts_per_round,
